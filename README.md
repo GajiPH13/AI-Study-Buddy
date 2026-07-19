@@ -1,372 +1,167 @@
-# AI Study Buddy
+ 
+ ## AI-Study-Buddy
+ ## 1. login and registration
+ - Email/password registration and login only.
+  - Users enter the platform immediately after login.
+  - No Google OAuth, email verification, password reset, 2FA, or MFA.
+  - npm is the package manager.
+  - Testing uses unit, integration, and manual acceptance checks—no automated E2E tooling.
 
-## Client Requirements Document
+  This prevents the old Google requirements from influencing later work.
 
-**Project type:** Small academic web application  
-**Version:** 1.0  
-**Status:** MVP requirements
+  ## 2. Establish the application foundation
 
-## 1. Project Overview
+  Create the Next.js App Router project with TypeScript and Tailwind CSS.
 
-AI Study Buddy is a web application that allows students to Email/password registration  and study with an AI-powered tutor. A student selects a subject and a learning mode, asks questions, and receives streamed responses from an OpenAI language model. The application saves each student's conversations so they can continue studying later.
+  Set up:
 
-The project will use TypeScript, Next.js, Tailwind CSS, Better Auth, the native MongoDB Node.js driver, and the OpenAI API. Mongoose will not be used. The server interface will consist of REST endpoints implemented with Next.js Route Handlers.
+  - npm scripts for development, linting, type checking, tests, and production builds.
+  - Server-only environment validation.
+  - Shared layouts and basic academic styling.
+  - Standard API success and error formats.
+  - Unit/integration test infrastructure.
+  - .env.example with MongoDB, Better Auth, and OpenAI settings.
 
-## 2. Project Goals
+  Completion check: the landing page renders, all npm verification scripts run, and no secret is exposed to the browser.
 
-- Provide simple, personalized explanations for students.
-- Let students request explanations, hints, and short quizzes.
-- Provide secure Google authentication.
-- Save private chat history for each student.
-- Demonstrate a complete full-stack application within a small assignment scope.
+  ## 3. Add MongoDB infrastructure
 
-## 3. Target Users
+  Connect to MongoDB Atlas through one cached native MongoClient.
 
-The primary user is a student who wants quick help understanding a school or university topic. The MVP does not include teachers, administrators, classrooms, or parent accounts.
+  Create typed access for:
 
-## 4. MVP Scope
+  - Better Auth collections.
+  - conversations.
+  - messages.
+  - rateLimits.
 
-### Included
+  Establish indexes through an idempotent setup script. Require a replica-set-capable MongoDB environment so deleting a
+  conversation and its messages can be transactional.
 
-- Landing page
-- sign-in and sign-out
-- Protected student dashboard
-- Create, view, rename, and delete a study conversation
-- Subject selection
-- Three tutoring modes: Explain, Hint, and Quiz
-- Text-based chat with streamed OpenAI responses
-- Persistent conversation history in MongoDB
-- Responsive desktop and mobile interface
-- Basic validation, rate limiting, and error handling
+  Completion check: repeated development reloads reuse connections, indexes can be safely applied more than once, and
+  connection failures return sanitized errors.
 
-### Not Included
+  ## 4. Implement direct authentication
 
+  Configure Better Auth for email/password only.
 
-- File or PDF uploads
-- Retrieval-augmented generation or vector search
-- Voice input or text-to-speech
-- Image generation
-- Teacher and administrator dashboards
-- Collaboration between students
-- Payments or subscriptions
-- Native mobile applications
+  Build:
 
-## 5. Technology Requirements
+  - Registration form with name, email, and password.
+  - Login form.
+  - Logout action.
+  - Session-aware navigation.
+  - Protection for /dashboard and /chat/[conversationId].
+  - Session validation inside every protected API handler.
 
-| Layer | Required technology |
-| --- | --- |
-| Language | TypeScript |
-| Framework | Next.js using the App Router |
-| User interface | React and Tailwind CSS |
-| Authentication | Better Auth |
-| Identity provider | Google OAuth |
-| Server API | REST endpoints using Next.js Route Handlers |
-| Database | MongoDB |
-| Database access | Native `mongodb` Node.js driver only; no Mongoose |
-| LLM provider | OpenAI API |
-| Validation | Zod |
-| Deployment | Vercel or another Next.js-compatible platform |
+  Do not add verification emails, recovery flows, OAuth buttons, or MFA prompts.
 
-## 6. Functional Requirements
+  Completion check: a student can register, log in, use the dashboard immediately, and lose protected access after
+  logout.
 
-### FR-01: Landing Page
+  ## 5. Build conversation creation and dashboard listing
 
-- The system shall display the application's purpose and key features.
-- The page shall provide a clear **Continue with Google** action.
-- An authenticated user shall be able to navigate directly to the dashboard.
+  Implement the first application-owned workflow:
 
-### FR-02: Authentication
+  1. The student selects a subject and tutor mode.
+  2. The server creates a conversation using the session’s user ID.
+  3. The dashboard lists that student’s conversations.
+  4. Selecting a conversation opens its chat page.
 
-- A user shall be able to sign in with a Google account through Better Auth.
-- The system shall create or update the user's authentication record after a successful sign-in.
-- A user shall be able to sign out.
-- Unauthenticated users shall not access the dashboard, conversations, or chat API.
-- Authentication secrets and OAuth credentials shall remain server-side.
+  Use cursor pagination and enforce page-size limits.
 
-### FR-03: Dashboard
+  Completion check: two test users see only their own conversations, and client-provided ownership fields are rejected
+  or ignored.
 
-- The dashboard shall display the signed-in user's name and profile image when available.
-- The dashboard shall list only conversations owned by the signed-in user.
-- Each list item shall show its title, subject, and last-updated time.
-- The user shall be able to create, open, rename, and delete a conversation.
-- The dashboard shall display a helpful empty state when no conversations exist.
+  ## 6. Add conversation management and history
 
-### FR-04: New Study Conversation
+  Implement:
 
-- The user shall select one subject before starting a conversation.
-- Initial subjects shall be Mathematics, Science, History, Programming, and General.
-- The user shall select one tutoring mode: Explain, Hint, or Quiz.
-- The system shall create a conversation owned by the authenticated user.
-- A default title may be created from the first message and may later be renamed.
+  - Loading an owned conversation and its newest messages.
+  - Loading older messages through a cursor.
+  - Renaming a conversation.
+  - Changing its subject or tutor mode.
+  - Confirmed deletion of the conversation and messages in one transaction.
 
-### FR-05: AI Chat
+  Every database operation must filter by both conversation ID and authenticated user ID. Missing and foreign
+  conversations should both appear as 404.
 
-- The user shall be able to submit a text message.
-- Empty messages and messages over the configured length limit shall be rejected.
-- The server shall send the message history, subject, tutoring mode, and a server-controlled system instruction to OpenAI.
-- The assistant response shall stream to the browser as it is generated.
-- The UI shall show pending, streaming, completed, and failed states.
-- The user shall be able to stop an active generation.
-- The completed user and assistant messages shall be stored in MongoDB.
-- API keys and system instructions shall not be exposed to the browser.
+  Completion check: refreshing preserves history, deletion removes all related messages, and changing a URL cannot
+  expose another user’s data.
 
-### FR-06: Tutor Modes
+  ## 7. Implement the basic streamed chat
 
-**Explain mode**
+  Build the Explain-mode path first.
 
-- The assistant shall explain the topic clearly and use examples when helpful.
-- The response should be appropriate for a student and avoid unnecessary complexity.
+  Request flow:
 
-**Hint mode**
+  1. Validate the session, body, message length, and conversation ownership.
+  2. Apply the per-user rate limit.
+  3. Moderate the input.
+  4. Persist the user message with a client-generated request ID.
+  5. Load only the bounded history needed for context.
+  6. call OpenAI from the server with subject, mode, safety instructions, and output limits.
+  7. Forward normalized streaming events to the browser.
+  8. Accumulate the complete answer server-side.
+  9. Persist the assistant message only after successful completion.
 
-- The assistant shall guide the student toward an answer instead of immediately solving the entire problem.
-- It may ask a short follow-up question when necessary.
+  The browser should represent pending, streaming, completed, and failed states. It must never receive the API key or
+  full server instruction.
 
-**Quiz mode**
+  Completion check: the response appears incrementally, exactly one user/assistant pair is saved, and refreshing
+  reproduces the completed exchange.
 
-- The assistant shall generate up to five relevant questions.
-- It shall not reveal the answers until the student attempts the questions or asks for them.
-- It shall provide concise feedback on the student's answer.
-
-### FR-07: Conversation History
+  ## 8. Add cancellation and retry
 
-- The user shall be able to reopen a saved conversation.
-- Messages shall appear in chronological order.
-- The system shall support pagination or a fixed maximum history size if a conversation becomes large.
-- Deleting a conversation shall also delete its messages.
-- A user shall never be able to read or modify another user's conversations by changing a URL or request body.
+  Treat every submitted prompt as a small generation state machine:
 
-### FR-08: Error Handling
+  - Pending
+  - Active
+  - Completed
+  - Failed
+  - Cancelled
 
-- The UI shall display understandable messages for authentication, validation, network, database, and OpenAI failures.
-- A failed AI request shall not create an empty assistant message.
-- The user shall be able to retry after a temporary failure.
-- Internal errors, stack traces, database details, and secret values shall not be returned to the client.
+  Stopping should abort the browser request and upstream OpenAI generation. Failed and cancelled generations retain the
+  user prompt but never create an empty or partial assistant document.
 
-## 7. Pages and Routes
+  Retry should:
 
-| Route | Access | Purpose |
-| --- | --- | --- |
-| `/` | Public | Landing page |
-| `/login` | Public | Google sign-in |
-| `/dashboard` | Authenticated | List and manage conversations |
-| `/chat/[conversationId]` | Owner only | Study chat interface |
-
-## 8. REST API Requirements
+  - Reference the existing unanswered user message.
+  - Prevent concurrent generation for the same prompt.
+  - Use an expiring lease so interrupted server work does not block the prompt forever.
+  - Count against the normal rate limit.
+  - Prevent duplicate assistant messages with a unique database constraint.
 
-All endpoints shall return JSON except the chat endpoint, which may return a streaming response. Protected endpoints shall obtain the user identity from the server session, never from a client-provided `userId`.
+  Completion check: repeated clicks, network interruption, cancellation, and retries cannot produce duplicate stored
+  messages.
 
-| Method | Endpoint | Purpose |
-| --- | --- | --- |
-| `GET` / `POST` | `/api/auth/[...all]` | Better Auth handler |
-| `GET` | `/api/conversations` | List the current user's conversations |
-| `POST` | `/api/conversations` | Create a conversation |
-| `GET` | `/api/conversations/:id` | Return one owned conversation and its messages |
-| `PATCH` | `/api/conversations/:id` | Rename or update the subject/mode |
-| `DELETE` | `/api/conversations/:id` | Delete an owned conversation and its messages |
-| `POST` | `/api/chat` | Validate a message and stream an OpenAI response |
+  ## 9. Add Hint and Quiz modes
 
-### Standard JSON Response Shape
+  Keep one chat pipeline and vary only the server-controlled tutor instructions.
 
-Successful non-streaming responses should use:
+  - Explain: clear explanation with examples.
+  - Hint: guidance without immediately supplying the complete solution.
+  - Quiz: no more than five questions, delayed answers, and concise feedback after an attempt.
 
-```json
-{
-  "data": {}
-}
-```
+  Changing mode affects later requests; it should not rewrite previous messages.
 
-Errors should use:
+  Completion check: integration tests verify the correct mode instruction, response limits, and history selection
+  without making real OpenAI calls.
 
-```json
-{
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "The message is required."
-  }
-}
-```
+  ## 10. Harden and manually accept the MVP
 
-Recommended status codes are `200`, `201`, `204`, `400`, `401`, `403`, `404`, `409`, `429`, and `500`.
+  Finish with:
 
-## 9. MongoDB Data Requirements
+  - Keyboard navigation and visible focus.
+  - Mobile layouts down to approximately 320px.
+  - Accessible streaming and error announcements.
+  - Plain-text message rendering.
+  - Sanitized logs and error responses.
+  - Mongo-backed rate-limit concurrency tests.
+  - Authentication and owner/non-owner API integration tests.
+  - Production build and client-bundle secret inspection.
+  - Vercel preview deployment with MongoDB Atlas.
 
-Better Auth collections shall follow its supported MongoDB adapter schema. Application data shall use the following collections.
-
-### `conversations`
-
-```ts
-type Conversation = {
-  _id: ObjectId;
-  userId: string;
-  title: string;
-  subject: "mathematics" | "science" | "history" | "programming" | "general";
-  mode: "explain" | "hint" | "quiz";
-  createdAt: Date;
-  updatedAt: Date;
-};
-```
-
-### `messages`
-
-```ts
-type ChatMessage = {
-  _id: ObjectId;
-  conversationId: ObjectId;
-  userId: string;
-  role: "user" | "assistant";
-  content: string;
-  createdAt: Date;
-};
-```
-
-### Required Indexes
-
-```ts
-conversations: { userId: 1, updatedAt: -1 }
-messages:      { conversationId: 1, createdAt: 1 }
-messages:      { userId: 1, conversationId: 1 }
-```
-
-The application shall reuse a cached `MongoClient` connection instead of opening a new connection for every request. All identifiers received from the client shall be validated before conversion to `ObjectId`.
-
-## 10. OpenAI Requirements
-
-- The server shall call OpenAI; the browser shall never call OpenAI directly.
-- The implementation should use OpenAI's current recommended text-generation API and support streaming.
-- The model name shall be configured through an environment variable so it can be changed without editing application code.
-- The server shall define the tutor's behavior and safety instructions.
-- Only the conversation history required to answer the current question shall be sent to the model.
-- The server shall set reasonable output-token limits to control cost and latency.
-- Requests shall have timeouts and cancellation support.
-- The application shall show a disclaimer that AI responses can be incorrect and should be verified for important academic work.
-
-## 11. Non-Functional Requirements
-
-### Security and Privacy
-
-- Every protected REST handler shall validate the Better Auth session.
-- Every conversation query shall include both the resource ID and authenticated user's ID.
-- Request bodies, path parameters, and enum values shall be validated with Zod.
-- Secrets shall be stored in environment variables and excluded from source control.
-- User input shall be rendered as text or sanitized Markdown; arbitrary HTML shall not be executed.
-- The chat endpoint shall apply per-user rate limiting.
-- Logs shall not contain OAuth tokens, session cookies, API keys, or complete private conversations.
-
-### Performance
-
-- The first visible application screen should load within three seconds on a normal connection.
-- The chat UI should display a pending or streaming state within one second of request acceptance.
-- Conversation lists should be limited and paginated when necessary.
-- MongoDB connections shall be pooled and reused.
-
-### Accessibility
-
-- The application shall be usable with a keyboard.
-- Inputs and buttons shall have accessible labels and visible focus states.
-- Text and controls shall maintain readable color contrast.
-- Streaming status and errors should be communicated to assistive technology.
-
-### Responsiveness
-
-- The interface shall work at mobile widths starting around 320 pixels.
-- The conversation sidebar may become a drawer on small screens.
-- The message composer shall remain easy to reach without covering messages.
-
-## 12. User Interface Requirements
-
-- Use a clean academic style with a limited color palette.
-- Clearly distinguish student and assistant messages.
-- Keep the message input visible near the bottom of the chat view.
-- Disable duplicate submission while the same message is being sent.
-- Provide loading skeletons or indicators for asynchronous content.
-- Confirm before permanently deleting a conversation.
-- Display the active subject and tutor mode in the chat header.
-
-## 13. Environment Variables
-
-The project shall document variables similar to the following in `.env.example` without real secret values:
-
-```dotenv
-MONGODB_URI=
-MONGODB_DB_NAME=ai_study_buddy
-
-BETTER_AUTH_SECRET=
-BETTER_AUTH_URL=http://localhost:3000
-
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-
-OPENAI_API_KEY=
-OPENAI_MODEL=
-```
-
-## 14. Acceptance Criteria
-
-The MVP is complete when all of the following are true:
-
-1. A visitor can sign in and sign out with Google.
-2. A visitor without a valid session cannot access protected pages or endpoints.
-3. An authenticated student can create a conversation with a subject and tutor mode.
-4. The student can send a message and see an OpenAI response stream into the chat.
-5. Refreshing the page preserves completed messages.
-6. The dashboard lists only the current student's conversations.
-7. A student cannot access another student's conversation by changing an ID.
-8. The student can rename and delete a conversation.
-9. Validation and service failures produce understandable error messages.
-10. The application works on both mobile and desktop screen sizes.
-11. The codebase uses the native MongoDB driver and contains no Mongoose dependency.
-12. No secret or OpenAI API key is included in client-side code or committed files.
-
-## 15. Suggested Delivery Plan
-
-### Phase 1: Foundation
-
-- Create the Next.js TypeScript application.
-- Configure Tailwind CSS and the shared layout.
-- Add the native MongoDB connection utility and indexes.
-
-### Phase 2: Authentication
-
-- Configure Better Auth with its MongoDB adapter.
-- Configure Google OAuth.
-- Add login, logout, session checks, and route protection.
-
-### Phase 3: Conversation REST API
-
-- Implement conversation CRUD endpoints.
-- Add Zod validation and ownership checks.
-- Build the dashboard and conversation list.
-
-### Phase 4: OpenAI Chat
-
-- Implement the server-side tutor prompt.
-- Add the streaming `/api/chat` endpoint.
-- Build the chat interface and persist completed messages.
-
-### Phase 5: Quality and Submission
-
-- Add rate limiting, errors, empty states, and deletion confirmation.
-- Test authentication, authorization, REST endpoints, and responsive layouts.
-- Create `.env.example`, setup instructions, screenshots, and the assignment demonstration.
-
-## 16. Testing Checklist
-
-- Email/password registration login succeeds and failed login is handled.
-- Logout invalidates access to protected resources.
-- Invalid and missing conversation IDs return appropriate errors.
-- Invalid subjects, modes, and empty messages are rejected.
-- A user cannot read, rename, delete, or chat in another user's conversation.
-- OpenAI timeout, cancellation, and failure states do not corrupt message history.
-- MongoDB reconnects correctly during local development.
-- The application passes TypeScript, lint, and production build checks.
-- Core pages are keyboard accessible and responsive.
-
-## 17. Reference Documentation
-
-- [Next.js App Router](https://nextjs.org/docs/app)
-- [Next.js Route Handlers](https://nextjs.org/docs/app/getting-started/route-handlers)
-- [Tailwind CSS](https://tailwindcss.com/docs)
-- [Better Auth](https://www.better-auth.com/docs)
-- [MongoDB Node.js Driver](https://www.mongodb.com/docs/drivers/node/current/)
-- [OpenAI API documentation](https://platform.openai.com/docs)
+  The final acceptance pass is manual: register or log in as a normal user, create and manage conversations, stream each
+  tutoring mode, stop and retry generation, refresh history, test mobile layout, log out, and attempt protected access
+  without a session.
