@@ -8,10 +8,10 @@
 
 ## Stack and boundaries
 
-- Use TypeScript, Next.js App Router, React, Tailwind CSS, Better Auth, Zod, the native MongoDB Node.js driver, and the OpenAI Responses API.
+- Use TypeScript, Next.js App Router, React, Tailwind CSS, Better Auth, Zod, the native MongoDB Node.js driver, and the configured server-side AI provider (Ollama by default; OpenAI optional).
 - Use npm and commit `package-lock.json`. Do not add pnpm or Yarn lockfiles.
 - Authentication is direct email/password registration and login only. Do not add OAuth, email verification, password reset, 2FA, MFA, or other multi-step authentication.
-- Do not add Mongoose, browser-side MongoDB or OpenAI calls, arbitrary HTML rendering, or secrets in `NEXT_PUBLIC_*` variables.
+- Do not add Mongoose, browser-side MongoDB or AI-provider calls, arbitrary HTML rendering, or secrets in `NEXT_PUBLIC_*` variables.
 - Keep file uploads, RAG, voice, image generation, payments, collaboration, and non-student roles out of the MVP.
 
 ## Architecture rules
