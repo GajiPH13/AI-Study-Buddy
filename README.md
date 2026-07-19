@@ -54,9 +54,9 @@
   - Protection for /dashboard and /chat/[conversationId].
   - Session validation inside every protected API handler.
 
-<<<<<<< HEAD
-  Do not add verification emails, recovery flows, OAuth buttons, or MFA prompts.
-=======
+ 
+  ## Do not add verification emails, recovery flows, OAuth buttons, or MFA prompts.
+
 | Layer | Required technology |
 | --- | --- |
 | Language | TypeScript |
@@ -111,7 +111,7 @@
 
   Request flow:
 
-<<<<<<< HEAD
+
   1. Validate the session, body, message length, and conversation ownership.
   2. Apply the per-user rate limit.
   3. Moderate the input.
@@ -121,7 +121,6 @@
   7. Forward normalized streaming events to the browser.
   8. Accumulate the complete answer server-side.
   9. Persist the assistant message only after successful completion.
-=======
 **Quiz mode**
 
 - The assistant shall generate up to five relevant questions.
@@ -165,7 +164,7 @@ All endpoints shall return JSON except the chat endpoint, which may return a str
 | `PATCH` | `/api/conversations/:id` | Rename or update the subject/mode |
 | `DELETE` | `/api/conversations/:id` | Delete an owned conversation and its messages |
 | `POST` | `/api/chat` | Validate a message and stream an OpenAI response |
->>>>>>> f857cf7cbe200591c306e831fcc7dc2582b2c599
+
 
   The browser should represent pending, streaming, completed, and failed states. It must never receive the API key or
   full server instruction.
@@ -224,11 +223,11 @@ All endpoints shall return JSON except the chat endpoint, which may return a str
   - Production build and client-bundle secret inspection.
   - Vercel preview deployment with MongoDB Atlas.
 
-<<<<<<< HEAD
+
   The final acceptance pass is manual: register or log in as a normal user, create and manage conversations, stream each
   tutoring mode, stop and retry generation, refresh history, test mobile layout, log out, and attempt protected access
   without a session.
-=======
+
 ## 11. Non-Functional Requirements
 
 ### Security and Privacy
@@ -358,4 +357,4 @@ The MVP is complete when all of the following are true:
 - [Better Auth](https://www.better-auth.com/docs)
 - [MongoDB Node.js Driver](https://www.mongodb.com/docs/drivers/node/current/)
 - [OpenAI API documentation](https://platform.openai.com/docs)
->>>>>>> f857cf7cbe200591c306e831fcc7dc2582b2c599
+
