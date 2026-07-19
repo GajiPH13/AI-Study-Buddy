@@ -59,7 +59,7 @@ The primary user is a student who wants quick help understanding a school or uni
 | Framework | Next.js using the App Router |
 | User interface | React and Tailwind CSS |
 | Authentication | Better Auth |
-| Identity provider | Google OAuth |
+
 | Server API | REST endpoints using Next.js Route Handlers |
 | Database | MongoDB |
 | Database access | Native `mongodb` Node.js driver only; no Mongoose |
@@ -148,7 +148,7 @@ The primary user is a student who wants quick help understanding a school or uni
 | Route | Access | Purpose |
 | --- | --- | --- |
 | `/` | Public | Landing page |
-| `/login` | Public | Google sign-in |
+| `/login` | Public | login/registration|
 | `/dashboard` | Authenticated | List and manage conversations |
 | `/chat/[conversationId]` | Owner only | Study chat interface |
 
@@ -305,7 +305,7 @@ OPENAI_MODEL=
 
 The MVP is complete when all of the following are true:
 
-1. A visitor can sign in and sign out with Google.
+1. A visitor can sign in and sign out with login/register and google sign in.
 2. A visitor without a valid session cannot access protected pages or endpoints.
 3. An authenticated student can create a conversation with a subject and tutor mode.
 4. The student can send a message and see an OpenAI response stream into the chat.
