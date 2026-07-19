@@ -70,7 +70,7 @@
 | LLM provider | OpenAI API |
 | Validation | Zod |
 | Deployment | Vercel or another Next.js-compatible platform |
->>>>>>> f857cf7cbe200591c306e831fcc7dc2582b2c599
+
 
   Completion check: a student can register, log in, use the dashboard immediately, and lose protected access after
   logout.
