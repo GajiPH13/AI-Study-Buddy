@@ -16,5 +16,12 @@ export async function ensureApplicationIndexes() {
       { unique: true, partialFilterExpression: { role: "assistant", replyToMessageId: { $type: "objectId" } } },
     ),
     db.collection("rateLimits").createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
+    db.collection("resources").createIndex({ subject: 1, difficulty: 1, createdAt: -1 }),
+    db.collection("resources").createIndex({ userId: 1, createdAt: -1 }),
+    db.collection("resources").createIndex({ viewCount: -1, createdAt: -1 }),
+    db.collection("resources").createIndex(
+      { title: "text", shortDescription: "text", tags: "text" },
+      { weights: { title: 10, shortDescription: 5, tags: 3 } },
+    ),
   ]);
 }

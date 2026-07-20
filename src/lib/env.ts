@@ -64,7 +64,7 @@ export function getAIProviderConfig(): AIProviderConfig {
   if (provider !== "openai") throw new Error("AI_PROVIDER must be either openai or ollama.");
   const parsed = z.object({
     OPENAI_API_KEY: z.string().min(1),
-    OPENAI_MODEL: z.string().min(1),
+    OPENAI_MODEL: z.string().min(1).default("gpt-4o-mini"),
   }).parse(process.env);
   cachedAIProvider = { provider: "openai", apiKey: parsed.OPENAI_API_KEY, model: parsed.OPENAI_MODEL };
   return cachedAIProvider;

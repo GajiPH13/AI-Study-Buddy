@@ -1,4 +1,4 @@
-import type { GenerationStatus, Subject, TutorMode } from "@/lib/models";
+import type { Difficulty, GenerationStatus, Subject, TutorMode } from "@/lib/models";
 
 export type ConversationDto = {
   id: string;
@@ -16,6 +16,27 @@ export type MessageDto = {
   createdAt: string;
   generationStatus?: GenerationStatus;
   replyToMessageId?: string;
+};
+
+export type ResourceDto = {
+  id: string;
+  userId: string;
+  title: string;
+  shortDescription: string;
+  fullDescription: string;
+  subject: Subject;
+  difficulty: Difficulty;
+  estimatedMinutes: number;
+  imageUrl?: string;
+  tags: string[];
+  viewCount: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type RecommendationDto = {
+  resource: ResourceDto;
+  reason: string;
 };
 
 export type ApiErrorBody = {

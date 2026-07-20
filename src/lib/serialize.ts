@@ -1,5 +1,5 @@
-import type { ChatMessage, Conversation } from "@/lib/models";
-import type { ConversationDto, MessageDto } from "@/lib/contracts";
+import type { ChatMessage, Conversation, StudyResource } from "@/lib/models";
+import type { ConversationDto, MessageDto, ResourceDto } from "@/lib/contracts";
 
 export function serializeConversation(conversation: Conversation): ConversationDto {
   return {
@@ -20,5 +20,23 @@ export function serializeMessage(message: ChatMessage): MessageDto {
     createdAt: message.createdAt.toISOString(),
     generationStatus: message.generationStatus,
     replyToMessageId: message.replyToMessageId?.toHexString(),
+  };
+}
+
+export function serializeResource(resource: StudyResource): ResourceDto {
+  return {
+    id: resource._id.toHexString(),
+    userId: resource.userId,
+    title: resource.title,
+    shortDescription: resource.shortDescription,
+    fullDescription: resource.fullDescription,
+    subject: resource.subject,
+    difficulty: resource.difficulty,
+    estimatedMinutes: resource.estimatedMinutes,
+    imageUrl: resource.imageUrl,
+    tags: resource.tags,
+    viewCount: resource.viewCount,
+    createdAt: resource.createdAt.toISOString(),
+    updatedAt: resource.updatedAt.toISOString(),
   };
 }

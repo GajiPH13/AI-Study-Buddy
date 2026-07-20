@@ -116,42 +116,42 @@ export function ChatClient({ conversationId }: { conversationId: string }) {
   }
 
   if (loading && !conversation) return <main className="grid min-h-screen place-items-center" aria-busy="true">Loading study session…</main>;
-  if (!conversation) return <main className="grid min-h-screen place-items-center px-5 text-center"><div><h1 className="text-2xl font-bold">Conversation unavailable</h1><p className="mt-2 text-[var(--muted)]">{error}</p><Link href="/dashboard" className="mt-5 inline-block font-bold text-[var(--primary)]">Return to dashboard</Link></div></main>;
+  if (!conversation) return <main className="grid min-h-screen place-items-center px-5 text-center"><div><h1 className="text-2xl font-bold">Conversation unavailable</h1><p className="mt-2 text-muted">{error}</p><Link href="/dashboard" className="mt-5 inline-block font-bold text-primary">Return to dashboard</Link></div></main>;
 
   return (
     <main className="grid min-h-dvh grid-rows-[auto_1fr_auto] bg-white">
-      <header className="border-b border-[var(--border)] bg-white px-4 py-3 sm:px-6">
+      <header className="border-b border-border bg-white px-4 py-3 sm:px-6">
         <div className="mx-auto flex max-w-5xl items-center gap-3">
-          <Link href="/dashboard" className="rounded-lg px-2 py-2 font-bold text-[var(--primary)]">← Sessions</Link>
-          <input aria-label="Conversation title" value={conversation.title} maxLength={80} onChange={(event) => setConversation({ ...conversation, title: event.target.value })} onBlur={(event) => { if (event.target.value.trim()) void updateConversation({ title: event.target.value.trim() }); }} className="min-w-0 flex-1 rounded-lg border border-transparent px-2 py-2 text-lg font-bold hover:border-[var(--border)] focus:border-[var(--primary)]" />
-          <select aria-label="Subject" value={conversation.subject} onChange={(event) => void updateConversation({ subject: event.target.value as ConversationDto["subject"] })} className="hidden rounded-lg border border-[var(--border)] px-2 py-2 sm:block">{SUBJECTS.map((value) => <option key={value} value={value}>{label(value)}</option>)}</select>
-          <select aria-label="Tutor mode" value={conversation.mode} onChange={(event) => void updateConversation({ mode: event.target.value as ConversationDto["mode"] })} className="rounded-lg border border-[var(--border)] px-2 py-2">{TUTOR_MODES.map((value) => <option key={value} value={value}>{label(value)}</option>)}</select>
+          <Link href="/dashboard" className="rounded-lg px-2 py-2 font-bold text-primary">← Sessions</Link>
+          <input aria-label="Conversation title" value={conversation.title} maxLength={80} onChange={(event) => setConversation({ ...conversation, title: event.target.value })} onBlur={(event) => { if (event.target.value.trim()) void updateConversation({ title: event.target.value.trim() }); }} className="min-w-0 flex-1 rounded-lg border border-transparent px-2 py-2 text-lg font-bold hover:border-border focus:border-primary" />
+          <select aria-label="Subject" value={conversation.subject} onChange={(event) => void updateConversation({ subject: event.target.value as ConversationDto["subject"] })} className="hidden rounded-lg border border-border px-2 py-2 sm:block">{SUBJECTS.map((value) => <option key={value} value={value}>{label(value)}</option>)}</select>
+          <select aria-label="Tutor mode" value={conversation.mode} onChange={(event) => void updateConversation({ mode: event.target.value as ConversationDto["mode"] })} className="rounded-lg border border-border px-2 py-2">{TUTOR_MODES.map((value) => <option key={value} value={value}>{label(value)}</option>)}</select>
         </div>
       </header>
 
       <section className="overflow-y-auto px-4 py-6 sm:px-6" aria-live="polite" aria-busy={streaming}>
         <div className="mx-auto grid max-w-3xl gap-5">
-          {nextCursor && <button type="button" disabled={loading} onClick={() => void load(nextCursor)} className="mx-auto rounded-lg border border-[var(--border)] px-4 py-2 text-sm font-semibold">{loading ? "Loading…" : "Load older messages"}</button>}
-          {messages.length === 0 && <div className="py-16 text-center"><h1 className="text-3xl font-bold">What would you like to study?</h1><p className="mt-3 text-[var(--muted)]">Ask for an explanation, guidance, or a quick knowledge check.</p></div>}
+          {nextCursor && <button type="button" disabled={loading} onClick={() => void load(nextCursor)} className="mx-auto rounded-lg border border-border px-4 py-2 text-sm font-semibold">{loading ? "Loading…" : "Load older messages"}</button>}
+          {messages.length === 0 && <div className="py-16 text-center"><h1 className="text-3xl font-bold">What would you like to study?</h1><p className="mt-3 text-muted">Ask for an explanation, guidance, or a quick knowledge check.</p></div>}
           {messages.map((message) => (
-            <article key={message.id} className={`max-w-[88%] whitespace-pre-wrap rounded-2xl px-5 py-4 leading-7 ${message.role === "user" ? "ml-auto bg-[var(--primary)] text-white" : "mr-auto border border-[var(--border)] bg-[var(--paper)]"}`}>
+            <article key={message.id} className={`max-w-[88%] whitespace-pre-wrap rounded-2xl px-5 py-4 leading-7 ${message.role === "user" ? "ml-auto bg-primary text-white" : "mr-auto border border-border bg-paper"}`}>
               <p>{message.content}</p>
               {message.role === "user" && (message.generationStatus === "failed" || message.generationStatus === "cancelled") && <button type="button" disabled={streaming} onClick={() => void retry(message)} className="mt-3 rounded-lg bg-white/15 px-3 py-1.5 text-sm font-bold hover:bg-white/25">Retry answer</button>}
             </article>
           ))}
-          {partial && <article className="mr-auto max-w-[88%] whitespace-pre-wrap rounded-2xl border border-[var(--border)] bg-[var(--paper)] px-5 py-4 leading-7">{partial}<span className="ml-1 inline-block size-2 animate-pulse rounded-full bg-[var(--primary)]" /></article>}
-          {error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-[var(--danger)]">{error}</p>}
+          {partial && <article className="mr-auto max-w-[88%] whitespace-pre-wrap rounded-2xl border border-border bg-paper px-5 py-4 leading-7">{partial}<span className="ml-1 inline-block size-2 animate-pulse rounded-full bg-primary" /></article>}
+          {error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-danger">{error}</p>}
           <div ref={bottomRef} />
         </div>
       </section>
 
-      <footer className="border-t border-[var(--border)] bg-white px-4 py-3 sm:px-6">
+      <footer className="border-t border-border bg-white px-4 py-3 sm:px-6">
         <form onSubmit={send} className="mx-auto flex max-w-3xl items-end gap-3">
           <label className="sr-only" htmlFor="message">Message your tutor</label>
-          <textarea id="message" name="message" required maxLength={4000} rows={2} disabled={streaming} placeholder={`Ask in ${label(conversation.mode)} mode…`} className="max-h-40 min-h-14 flex-1 resize-y rounded-2xl border border-[var(--border)] px-4 py-3 outline-none focus:border-[var(--primary)] disabled:bg-slate-100" />
-          {streaming ? <button type="button" onClick={() => abortRef.current?.abort()} className="rounded-xl bg-slate-800 px-5 py-3.5 font-bold text-white">Stop</button> : <button className="rounded-xl bg-[var(--primary)] px-5 py-3.5 font-bold text-white">Send</button>}
+          <textarea id="message" name="message" required maxLength={4000} rows={2} disabled={streaming} placeholder={`Ask in ${label(conversation.mode)} mode…`} className="max-h-40 min-h-14 flex-1 resize-y rounded-2xl border border-border px-4 py-3 outline-none focus:border-primary disabled:bg-slate-100" />
+          {streaming ? <button type="button" onClick={() => abortRef.current?.abort()} className="rounded-xl bg-slate-800 px-5 py-3.5 font-bold text-white">Stop</button> : <button className="rounded-xl bg-primary px-5 py-3.5 font-bold text-white">Send</button>}
         </form>
-        <p className="mx-auto mt-2 max-w-3xl text-center text-xs text-[var(--muted)]">AI responses can be incorrect. Verify important academic work.</p>
+        <p className="mx-auto mt-2 max-w-3xl text-center text-xs text-muted">AI responses can be incorrect. Verify important academic work.</p>
       </footer>
     </main>
   );

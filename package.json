@@ -14,12 +14,14 @@
   "dependencies": {
     "@better-auth/mongo-adapter": "latest",
     "@next/env": "16.2.10",
+    "@tanstack/react-query": "^5.101.2",
     "better-auth": "latest",
     "mongodb": "latest",
     "next": "latest",
     "openai": "latest",
     "react": "latest",
     "react-dom": "latest",
+    "recharts": "^3.9.2",
     "zod": "latest"
   },
   "devDependencies": {
